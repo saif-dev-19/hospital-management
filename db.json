@@ -1,0 +1,23 @@
+{
+  "patients": [
+    { "id": 1, "name": "John Doe", "age": 30, "gender": "Male", "diagnosis": "Flu", "admission": false },
+    { "id": 2, "name": "Jane Doe", "age": 25, "gender": "Female", "diagnosis": "Diabetes", "admission": true }
+  ],
+  "doctors": [
+    { "id": 1, "name": "Dr. Smith", "specialization": "Cardiology", "schedule": ["Mon", "Wed", "Fri"] },
+    { "id": 2, "name": "Dr. Brown", "specialization": "Neurology", "schedule": ["Tue", "Thu"] }
+  ],
+  "appointments": [
+    { "id": 1, "patientId": 1, "doctorId": 1, "date": "2025-11-05", "status": "booked" },
+    { "id": 2, "patientId": 2, "doctorId": 2, "date": "2025-11-06", "status": "cancelled" }
+  ],
+  "users": [
+    { "id": 1, "username": "admin1", "password": "1234", "role": "admin" },
+    { "id": 2, "username": "dr.rahim", "password": "5678", "role": "doctor" },
+    { "id": 3, "username": "patient1", "password": "abcd", "role": "patient" }
+  ],
+  "billing": [
+    { "id": 1, "patientId": 1, "amount": 150, "status": "paid" },
+    { "id": 2, "patientId": 2, "amount": 300, "status": "pending" }
+  ]
+}

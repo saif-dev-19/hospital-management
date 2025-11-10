@@ -6,6 +6,7 @@ import DoctorDashboard from "./pages/doctor/DoctorDashboard";
 import PatientDashboard from "./pages/patient/PatientDashboard";
 import NotAuthorized from "./pages/NotAuthorized";
 import ProtectedRoute from "./components/ProtectedRoute";
+import BookAppointment from "./pages/patient/BookAppointment"
 
 function App() {
   const [role, setRole] = useState(null);
@@ -38,14 +39,26 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route
-          path="/patient-dashboard"
+        {/* <Route
+          path="/patient-dashboard/*"
           element={
             <ProtectedRoute allowedRole="patient" currentRole={role}>
               <PatientDashboard />
             </ProtectedRoute>
           }
-        />
+        /> */}
+
+      <Route
+          path="/patient-dashboard/*"
+          element={
+            <ProtectedRoute allowedRole="patient" currentRole={role}>
+              <PatientDashboard />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<PatientDashboard />} />
+          <Route path="book-appointment" element={<BookAppointment />} />
+      </Route>
         <Route path="/not-authorized" element={<NotAuthorized />} />
       </Routes>
     </Router>

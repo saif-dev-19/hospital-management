@@ -12,9 +12,9 @@
     { "id": 2, "patientId": 2, "doctorId": 2, "date": "2025-11-06", "status": "cancelled" }
   ],
   "users": [
-    { "id": 1, "username": "admin1", "password": "1234", "role": "admin" },
-    { "id": 2, "username": "dr.rahim", "password": "5678", "role": "doctor" },
-    { "id": 3, "username": "patient1", "password": "abcd", "role": "patient" }
+    { "id": 1, "username": "admin", "password": "1234", "role": "admin" },
+    { "id": 2, "username": "dr.fahim", "password": "5678", "role": "doctor" },
+    { "id": 3, "username": "nadeem", "password": "abcd", "role": "patient" }
   ],
   "billing": [
     { "id": 1, "patientId": 1, "amount": 150, "status": "paid" },

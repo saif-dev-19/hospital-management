@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backend API Tester</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 5px;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .error {
+            color: #f44336;
+            background: #ffebee;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .success {
+            color: #4CAF50;
+            background: #e8f5e9;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        pre {
+            background: #263238;
+            color: #aed581;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        label {
+            font-weight: bold;
+            display: block;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏥 Backend API Tester</h1>
+        <p>Test your Django backend authentication endpoints</p>
+
+        <!-- Test 1: Check Backend Connection -->
+        <div class="test-section">
+            <h2>1. Check Backend Connection</h2>
+            <button onclick="testConnection()">Test Connection</button>
+            <div id="connection-result"></div>
+        </div>
+
+        <!-- Test 2: Register User -->
+        <div class="test-section">
+            <h2>2. Register New User</h2>
+            <label>Username:</label>
+            <input type="text" id="reg-username" value="testuser123" />
+            
+            <label>Email:</label>
+            <input type="email" id="reg-email" value="testuser123@test.com" />
+            
+            <label>Password:</label>
+            <input type="password" id="reg-password" value="testpass123" />
+            
+            <label>Role:</label>
+            <select id="reg-role" style="width: 100%; padding: 10px; margin: 5px 0;">
+                <option value="patient">Patient</option>
+                <option value="doctor">Doctor</option>
+            </select>
+            
+            <button onclick="testRegister()">Register User</button>
+            <div id="register-result"></div>
+        </div>
+
+        <!-- Test 3: Login User -->
+        <div class="test-section">
+            <h2>3. Login User</h2>
+            <label>Email:</label>
+            <input type="email" id="login-email" value="testuser123@test.com" />
+            
+            <label>Password:</label>
+            <input type="password" id="login-password" value="testpass123" />
+            
+            <button onclick="testLogin()">Login</button>
+            <div id="login-result"></div>
+        </div>
+
+        <!-- Test 4: Check User in Backend -->
+        <div class="test-section">
+            <h2>4. Backend Checklist</h2>
+            <p>If login fails, check these in your Django backend:</p>
+            <ol>
+                <li>Is the backend running on <code>http://localhost:8000</code>?</li>
+                <li>Run: <code>python manage.py runserver</code></li>
+                <li>Check if user is active in Django shell:
+                    <pre>python manage.py shell
+from django.contrib.auth import get_user_model
+User = get_user_model()
+user = User.objects.get(email='testuser123@test.com')
+print(f"Is Active: {user.is_active}")
+print(f"Password Check: {user.check_password('testpass123')}")</pre>
+                </li>
+                <li>If user is not active, activate them:
+                    <pre>user.is_active = True
+user.save()</pre>
+                </li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8000/api';
+
+        async function testConnection() {
+            const resultDiv = document.getElementById('connection-result');
+            resultDiv.innerHTML = '<p>Testing connection...</p>';
+            
+            try {
+                const response = await fetch(`${API_URL}/auth/register/`, {
+                    method: 'OPTIONS'
+                });
+                
+                if (response.ok || response.status === 200 || response.status === 405) {
+                    resultDiv.innerHTML = '<div class="success">✅ Backend is reachable!</div>';
+                } else {
+                    resultDiv.innerHTML = `<div class="error">⚠️ Backend responded with status: ${response.status}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ Cannot connect to backend at ${API_URL}<br>Error: ${error.message}<br><br>Make sure Django backend is running: <code>python manage.py runserver</code></div>`;
+            }
+        }
+
+        async function testRegister() {
+            const resultDiv = document.getElementById('register-result');
+            resultDiv.innerHTML = '<p>Registering user...</p>';
+            
+            const username = document.getElementById('reg-username').value;
+            const email = document.getElementById('reg-email').value;
+            const password = document.getElementById('reg-password').value;
+            const role = document.getElementById('reg-role').value;
+            
+            const payload = {
+                username,
+                email,
+                password,
+                password2: password,
+                role
+            };
+            
+            try {
+                const response = await fetch(`${API_URL}/auth/register/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `
+                        <div class="success">✅ Registration Successful!</div>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                        <p>Now try logging in with these credentials in Test 3 below.</p>
+                    `;
+                    
+                    // Auto-fill login form
+                    document.getElementById('login-email').value = email;
+                    document.getElementById('login-password').value = password;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="error">❌ Registration Failed</div>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ Error: ${error.message}</div>`;
+            }
+        }
+
+        async function testLogin() {
+            const resultDiv = document.getElementById('login-result');
+            resultDiv.innerHTML = '<p>Logging in...</p>';
+            
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            
+            const payload = {
+                email,
+                password
+            };
+            
+            try {
+                const response = await fetch(`${API_URL}/auth/login/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `
+                        <div class="success">✅ Login Successful!</div>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                        <p><strong>Your frontend authentication should work now!</strong></p>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="error">❌ Login Failed</div>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                        <p><strong>Common Issues:</strong></p>
+                        <ul>
+                            <li>User account might not be activated (is_active=False)</li>
+                            <li>Password might not be saved correctly</li>
+                            <li>Email might not match exactly</li>
+                        </ul>
+                        <p><strong>Fix:</strong> Check section 4 above for Django shell commands to activate the user.</p>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ Error: ${error.message}</div>`;
+            }
+        }
+
+        // Auto-test connection on load
+        window.onload = () => {
+            testConnection();
+        };
+    </script>
+</body>
+</html>

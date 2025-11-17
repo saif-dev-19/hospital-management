@@ -1,170 +1,98 @@
-import React, { useEffect, useState } from 'react';
-import { Grid, Typography, Box, Paper, List, ListItem, ListItemText, Chip, Button, Card, CardContent } from '@mui/material';
-import { Event, History, Receipt, Message, Add } from '@mui/icons-material';
-import Layout from '../../components/Layout';
-import DashboardCard from '../../components/DashboardCard';
-import axios from 'axios';
+import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
+import { FaHome, FaCalendarPlus, FaUserMd, FaFileMedical, FaCog, FaBell, FaSignOutAlt, FaBars, FaTimes, FaHeartbeat } from "react-icons/fa";
+import { useState } from "react";
+import authService from "../../api/authService";
+import Dashboard from "./Dashboard";
+import BookAppointment from "./BookAppointment";
+import MyAppointments from "./MyAppointments";
+import Doctors from "./Doctors";
+import MedicalRecords from "./MedicalRecords";
+import Profile from "./Profile";
+import Notifications from "./Notifications";
 
-const PatientDashboard = () => {
-  const [appointments, setAppointments] = useState([]);
-  const [medicalHistory, setMedicalHistory] = useState([]);
-  const user = JSON.parse(localStorage.getItem('user'));
+const PatientDashboard = ({ setRole, setUser }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
-  useEffect(() => {
-    if (user) {
-      const fetchData = async () => {
-        try {
-          const [appointmentsRes] = await Promise.all([
-            axios.get(`http://localhost:5000/appointments?patientId=${user.id}`),
-          ]);
-          setAppointments(appointmentsRes.data);
-          // Mock medical history
-          setMedicalHistory([
-            { id: 1, date: '2023-10-01', diagnosis: 'Common Cold', doctor: 'Dr. Smith' },
-            { id: 2, date: '2023-09-15', diagnosis: 'Check-up', doctor: 'Dr. Johnson' },
-          ]);
-        } catch (error) {
-          console.error('Error fetching data:', error);
-        }
-      };
-      fetchData();
-    }
-  }, [user]);
+  const menuItems = [
+    { path: "/patient/dashboard", icon: <FaHome />, label: "Dashboard" },
+    { path: "/patient/book-appointment", icon: <FaCalendarPlus />, label: "Book Appointment" },
+    { path: "/patient/appointments", icon: <FaCalendarPlus />, label: "My Appointments" },
+    { path: "/patient/doctors", icon: <FaUserMd />, label: "Find Doctors" },
+    { path: "/patient/records", icon: <FaFileMedical />, label: "Medical Records" },
+    { path: "/patient/notifications", icon: <FaBell />, label: "Notifications" },
+    { path: "/patient/profile", icon: <FaCog />, label: "Profile" },
+  ];
 
-  const upcomingAppointments = appointments.filter(app => new Date(app.date) >= new Date());
-  const pastAppointments = appointments.filter(app => new Date(app.date) < new Date());
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'confirmed': return 'success';
-      case 'pending': return 'warning';
-      case 'cancelled': return 'error';
-      default: return 'default';
-    }
+  const handleLogout = async () => {
+    await authService.logout();
+    setRole(null);
+    setUser(null);
+    navigate("/login");
   };
 
   return (
-    <Layout title="Patient Dashboard" role="patient">
-      <Box sx={{ flexGrow: 1, p: 3 }}>
-        <Typography variant="h4" gutterBottom sx={{ mb: 4, fontWeight: 'bold' }}>
-          Welcome {user?.name || 'Patient'}! Manage your health records.
-        </Typography>
+    <div className="flex h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50">
+      {/* Sidebar */}
+      <div className={`${sidebarOpen ? "w-64" : "w-20"} bg-gradient-to-b from-rose-600 to-pink-700 text-white transition-all duration-300 flex flex-col shadow-2xl`}>
+        {/* Header */}
+        <div className="p-6 flex items-center justify-between border-b border-white/20">
+          {sidebarOpen && (
+            <div className="flex items-center space-x-2">
+              <FaHeartbeat className="text-2xl" />
+              <h1 className="text-2xl font-bold">Patient Portal</h1>
+            </div>
+          )}
+          <button onClick={() => setSidebarOpen(!sidebarOpen)} className="text-white hover:bg-white/20 p-2 rounded-lg">
+            {sidebarOpen ? <FaTimes /> : <FaBars />}
+          </button>
+        </div>
 
-        <Grid container spacing={3}>
-          <Grid item xs={12} sm={6} md={3}>
-            <DashboardCard
-              title="Upcoming Appointments"
-              value={upcomingAppointments.length}
-              icon={<Event />}
-              color="primary"
-            />
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <DashboardCard
-              title="Medical Records"
-              value={medicalHistory.length}
-              icon={<History />}
-              color="secondary"
-            />
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <DashboardCard
-              title="Prescriptions"
-              value="3" // Mock data
-              icon={<Receipt />}
-              color="success"
-            />
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <DashboardCard
-              title="Messages"
-              value="2" // Mock data
-              icon={<Message />}
-              color="warning"
-            />
-          </Grid>
-        </Grid>
+        {/* Menu Items */}
+        <nav className="flex-1 p-4 space-y-2">
+          {menuItems.map((item) => (
+            <button
+              key={item.path}
+              onClick={() => navigate(item.path)}
+              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition transform hover:scale-105 ${
+                location.pathname === item.path
+                  ? "bg-white text-rose-600 shadow-lg"
+                  : "hover:bg-white/10"
+              }`}
+            >
+              <span className="text-xl">{item.icon}</span>
+              {sidebarOpen && <span className="font-semibold">{item.label}</span>}
+            </button>
+          ))}
+        </nav>
 
-        <Grid container spacing={3} sx={{ mt: 4 }}>
-          <Grid item xs={12} md={6}>
-            <Paper sx={{ p: 3, height: 400, overflow: 'auto' }}>
-              <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-                <Typography variant="h6">
-                  Upcoming Appointments
-                </Typography>
-                <Button variant="contained" startIcon={<Add />} size="small">
-                  Book New
-                </Button>
-              </Box>
-              <List>
-                {upcomingAppointments.length > 0 ? (
-                  upcomingAppointments.map((appointment) => (
-                    <ListItem key={appointment.id} divider>
-                      <ListItemText
-                        primary={`Doctor ID: ${appointment.doctorId}`}
-                        secondary={`Date: ${appointment.date} | Time: ${appointment.time || 'TBD'}`}
-                      />
-                      <Chip
-                        label={appointment.status}
-                        color={getStatusColor(appointment.status)}
-                        size="small"
-                      />
-                    </ListItem>
-                  ))
-                ) : (
-                  <Typography variant="body2" color="text.secondary">
-                    No upcoming appointments.
-                  </Typography>
-                )}
-              </List>
-            </Paper>
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <Paper sx={{ p: 3, height: 400, overflow: 'auto' }}>
-              <Typography variant="h6" gutterBottom>
-                Recent Medical History
-              </Typography>
-              <List>
-                {medicalHistory.map((record) => (
-                  <ListItem key={record.id} divider>
-                    <ListItemText
-                      primary={record.diagnosis}
-                      secondary={`Date: ${record.date} | Doctor: ${record.doctor}`}
-                    />
-                  </ListItem>
-                ))}
-              </List>
-            </Paper>
-          </Grid>
-        </Grid>
+        {/* Logout */}
+        <div className="p-4 border-t border-white/20">
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-red-500 transition"
+          >
+            <FaSignOutAlt className="text-xl" />
+            {sidebarOpen && <span className="font-semibold">Logout</span>}
+          </button>
+        </div>
+      </div>
 
-        <Grid container spacing={3} sx={{ mt: 4 }}>
-          <Grid item xs={12}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6" gutterBottom>
-                  Quick Actions
-                </Typography>
-                <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-                  <Button variant="contained" color="primary" startIcon={<Add />}>
-                    Book Appointment
-                  </Button>
-                  <Button variant="outlined" color="primary" startIcon={<History />}>
-                    View Full History
-                  </Button>
-                  <Button variant="outlined" color="secondary" startIcon={<Receipt />}>
-                    Download Prescriptions
-                  </Button>
-                  <Button variant="outlined" color="success" startIcon={<Message />}>
-                    Contact Doctor
-                  </Button>
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
-        </Grid>
-      </Box>
-    </Layout>
+      {/* Main Content */}
+      <div className="flex-1 overflow-auto">
+        <Routes>
+          <Route path="dashboard" element={<Dashboard />} />
+          <Route path="book-appointment" element={<BookAppointment />} />
+          <Route path="appointments" element={<MyAppointments />} />
+          <Route path="doctors" element={<Doctors />} />
+          <Route path="records" element={<MedicalRecords />} />
+          <Route path="notifications" element={<Notifications />} />
+          <Route path="profile" element={<Profile />} />
+          <Route path="*" element={<Dashboard />} />
+        </Routes>
+      </div>
+    </div>
   );
 };
 

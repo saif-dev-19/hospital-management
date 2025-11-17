@@ -1,143 +1,95 @@
-import React, { useEffect, useState } from 'react';
-import { Grid, Typography, Box, Paper, List, ListItem, ListItemText, Chip, Button } from '@mui/material';
-import { Event, People, Receipt, Message } from '@mui/icons-material';
-import Layout from '../../components/Layout';
-import DashboardCard from '../../components/DashboardCard';
-import axios from 'axios';
+import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
+import { FaHome, FaCalendarAlt, FaUsers, FaFileMedical, FaCog, FaBell, FaSignOutAlt, FaBars, FaTimes, FaStethoscope } from "react-icons/fa";
+import { useState } from "react";
+import authService from "../../api/authService";
+import Dashboard from "./Dashboard";
+import Appointments from "./Appointments";
+import Patients from "./Patients";
+import MedicalRecords from "./MedicalRecords";
+import Settings from "./Settings";
+import Notifications from "./Notifications";
 
-const DoctorDashboard = () => {
-  const [appointments, setAppointments] = useState([]);
-  const [patients, setPatients] = useState([]);
-  const user = JSON.parse(localStorage.getItem('user'));
+const DoctorDashboard = ({ setRole, setUser }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
-  useEffect(() => {
-    if (user) {
-      const fetchData = async () => {
-        try {
-          const [appointmentsRes, patientsRes] = await Promise.all([
-            axios.get(`http://localhost:5000/appointments?doctorId=${user.id}`),
-            axios.get('http://localhost:5000/patients'),
-          ]);
-          setAppointments(appointmentsRes.data);
-          setPatients(patientsRes.data);
-        } catch (error) {
-          console.error('Error fetching data:', error);
-        }
-      };
-      fetchData();
-    }
-  }, [user]);
+  const menuItems = [
+    { path: "/doctor/dashboard", icon: <FaHome />, label: "Dashboard" },
+    { path: "/doctor/appointments", icon: <FaCalendarAlt />, label: "Appointments" },
+    { path: "/doctor/patients", icon: <FaUsers />, label: "My Patients" },
+    { path: "/doctor/records", icon: <FaFileMedical />, label: "Medical Records" },
+    { path: "/doctor/settings", icon: <FaCog />, label: "Settings" },
+  ];
 
-  const todayAppointments = appointments.filter(app => {
-    const today = new Date().toISOString().split('T')[0];
-    return app.date === today;
-  });
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'confirmed': return 'success';
-      case 'pending': return 'warning';
-      case 'cancelled': return 'error';
-      default: return 'default';
-    }
+  const handleLogout = async () => {
+    await authService.logout();
+    setRole(null);
+    setUser(null);
+    navigate("/login");
   };
 
   return (
-    <Layout title="Doctor Dashboard" role="doctor">
-      <Box sx={{ flexGrow: 1, p: 3 }}>
-        <Typography variant="h4" gutterBottom sx={{ mb: 4, fontWeight: 'bold' }}>
-          Welcome Dr. {user?.name || 'Doctor'}! Manage your patients and appointments.
-        </Typography>
+    <div className="flex h-screen bg-gradient-to-br from-teal-50 via-cyan-50 to-blue-50">
+      {/* Sidebar */}
+      <div className={`${sidebarOpen ? "w-64" : "w-20"} bg-gradient-to-b from-teal-600 to-cyan-700 text-white transition-all duration-300 flex flex-col shadow-2xl`}>
+        {/* Header */}
+        <div className="p-6 flex items-center justify-between border-b border-white/20">
+          {sidebarOpen && (
+            <div className="flex items-center space-x-2">
+              <FaStethoscope className="text-2xl" />
+              <h1 className="text-2xl font-bold">Doctor Panel</h1>
+            </div>
+          )}
+          <button onClick={() => setSidebarOpen(!sidebarOpen)} className="text-white hover:bg-white/20 p-2 rounded-lg">
+            {sidebarOpen ? <FaTimes /> : <FaBars />}
+          </button>
+        </div>
 
-        <Grid container spacing={3}>
-          <Grid item xs={12} sm={6} md={3}>
-            <DashboardCard
-              title="Today's Appointments"
-              value={todayAppointments.length}
-              icon={<Event />}
-              color="primary"
-            />
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <DashboardCard
-              title="Total Patients"
-              value={patients.length}
-              icon={<People />}
-              color="secondary"
-            />
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <DashboardCard
-              title="Pending Prescriptions"
-              value="5" // Mock data
-              icon={<Receipt />}
-              color="success"
-            />
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <DashboardCard
-              title="Messages"
-              value="3" // Mock data
-              icon={<Message />}
-              color="warning"
-            />
-          </Grid>
-        </Grid>
+        {/* Menu Items */}
+        <nav className="flex-1 p-4 space-y-2">
+          {menuItems.map((item) => (
+            <button
+              key={item.path}
+              onClick={() => navigate(item.path)}
+              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition transform hover:scale-105 ${
+                location.pathname === item.path
+                  ? "bg-white text-teal-600 shadow-lg"
+                  : "hover:bg-white/10"
+              }`}
+            >
+              <span className="text-xl">{item.icon}</span>
+              {sidebarOpen && <span className="font-semibold">{item.label}</span>}
+            </button>
+          ))}
+        </nav>
 
-        <Grid container spacing={3} sx={{ mt: 4 }}>
-          <Grid item xs={12} md={6}>
-            <Paper sx={{ p: 3, height: 400, overflow: 'auto' }}>
-              <Typography variant="h6" gutterBottom>
-                Today's Appointments
-              </Typography>
-              <List>
-                {todayAppointments.length > 0 ? (
-                  todayAppointments.map((appointment) => (
-                    <ListItem key={appointment.id} divider>
-                      <ListItemText
-                        primary={`Patient ID: ${appointment.patientId}`}
-                        secondary={`Time: ${appointment.time || 'TBD'} | Status: `}
-                      />
-                      <Chip
-                        label={appointment.status}
-                        color={getStatusColor(appointment.status)}
-                        size="small"
-                      />
-                    </ListItem>
-                  ))
-                ) : (
-                  <Typography variant="body2" color="text.secondary">
-                    No appointments for today.
-                  </Typography>
-                )}
-              </List>
-            </Paper>
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <Paper sx={{ p: 3, height: 400 }}>
-              <Typography variant="h6" gutterBottom>
-                Quick Actions
-              </Typography>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <Button variant="contained" color="primary">
-                  View Patient Details
-                </Button>
-                <Button variant="contained" color="secondary">
-                  Write Prescription
-                </Button>
-                <Button variant="outlined" color="primary">
-                  Send Message
-                </Button>
-                <Button variant="outlined" color="secondary">
-                  Update Appointment
-                </Button>
-              </Box>
-            </Paper>
-          </Grid>
-        </Grid>
-      </Box>
-    </Layout>
+        {/* Logout */}
+        <div className="p-4 border-t border-white/20">
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-red-500 transition"
+          >
+            <FaSignOutAlt className="text-xl" />
+            {sidebarOpen && <span className="font-semibold">Logout</span>}
+          </button>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="flex-1 overflow-auto">
+        <Routes>
+          <Route path="dashboard" element={<Dashboard />} />
+          <Route path="appointments" element={<Appointments />} />
+          <Route path="patients" element={<Patients />} />
+          <Route path="records" element={<MedicalRecords />} />
+          <Route path="notifications" element={<Notifications />} />
+          <Route path="settings" element={<Settings />} />
+          <Route path="*" element={<Dashboard />} />
+        </Routes>
+      </div>
+    </div>
   );
 };
 
-export default DoctorDashboard;
+export default DoctorDashboard

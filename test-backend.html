@@ -128,7 +128,7 @@
             <h2>4. Backend Checklist</h2>
             <p>If login fails, check these in your Django backend:</p>
             <ol>
-                <li>Is the backend running on <code>http://localhost:8000</code>?</li>
+                <li>Is the backend running on <code>https://healsync-lime.vercel.app/api</code>?</li>
                 <li>Run: <code>python manage.py runserver</code></li>
                 <li>Check if user is active in Django shell:
                     <pre>python manage.py shell
@@ -147,7 +147,7 @@ user.save()</pre>
     </div>
 
     <script>
-        const API_URL = 'http://localhost:8000/api';
+        const API_URL = 'https://healsync-lime.vercel.app/api';
 
         async function testConnection() {
             const resultDiv = document.getElementById('connection-result');

@@ -2,18 +2,18 @@ import axios from 'axios';
 
 // Create axios instance with base URL
 const API = axios.create({
-  baseURL: 'http://localhost:8000/api',
+  baseURL: 'https://healsync-lime.vercel.app/api',
   headers: {
     'Content-Type': 'application/json',
   },
-});
+}); 
 
 // Request interceptor to add token
 API.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('access_token');
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+      config.headers.Authorization = `JWT ${token}`;
     }
     return config;
   },
@@ -35,14 +35,14 @@ API.interceptors.response.use(
       try {
         const refreshToken = localStorage.getItem('refresh_token');
         const response = await axios.post(
-          'http://localhost:8000/api/auth/token/refresh/',
+          'https://healsync-lime.vercel.app/api/auth/token/refresh/',
           { refresh: refreshToken }
         );
 
         const { access } = response.data;
         localStorage.setItem('access_token', access);
 
-        originalRequest.headers.Authorization = `Bearer ${access}`;
+        originalRequest.headers.Authorization = `JWT ${access}`;
         return API(originalRequest);
       } catch (refreshError) {
         // Refresh failed, logout user

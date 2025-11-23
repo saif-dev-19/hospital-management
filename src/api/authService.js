@@ -9,8 +9,18 @@ const authService = {
         email: userData.email,
         password: userData.password,
         password2: userData.password,
+        first_name: userData.first_name || '',
+        last_name: userData.last_name || '',
+        phone: userData.phone || '',
         role: userData.role
       };
+
+      // Add specialty only for doctors - backend expects 'specialty' not 'specialty_id'
+      if (userData.role === 'doctor' && userData.specialty) {
+        payload.specialty = Number(userData.specialty);
+      }
+      
+      console.log("Final registration payload:", JSON.stringify(payload, null, 2));
       
       const response = await API.post('/auth/register/', payload);
       
@@ -25,7 +35,7 @@ const authService = {
       return response.data;
     } catch (error) {
       if (error.response?.status === 0 || error.code === 'ERR_NETWORK') {
-        throw { message: 'Cannot connect to server. Please ensure the backend is running on http://localhost:8000' };
+        throw { message: 'Cannot connect to server.' };
       }
       throw error.response?.data || error.message;
     }
@@ -47,7 +57,7 @@ const authService = {
       return response.data;
     } catch (error) {
       if (error.response?.status === 0 || error.code === 'ERR_NETWORK') {
-        throw { detail: 'Cannot connect to server. Please ensure the backend is running on http://localhost:8000' };
+        throw { detail: 'Cannot connect to server.' };
       }
       throw error.response?.data || error.message;
     }
@@ -97,6 +107,56 @@ const authService = {
         old_password: oldPassword,
         new_password: newPassword,
       });
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
+  },
+
+  // Get doctor's appointments
+  getDoctorAppointments: async () => {
+    try {
+      const response = await API.get('/appointments/doctor/');
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
+  },
+
+  // Get all appointments (admin)
+  getAllAppointments: async () => {
+    try {
+      const response = await API.get('/appointments/');
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
+  },
+
+  // Get appointment detail
+  getAppointmentDetail: async (id) => {
+    try {
+      const response = await API.get(`/appointments/${id}/`);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
+  },
+
+  // Update appointment status (admin only)
+  updateAppointmentStatus: async (id, status) => {
+    try {
+      const response = await API.patch(`/appointments/${id}/update-status/`, { status });
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
+  },
+
+  // Get specialties
+  getSpecialties: async () => {
+    try {
+      const response = await API.get('/specialties/');
       return response.data;
     } catch (error) {
       throw error.response?.data || error.message;

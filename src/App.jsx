@@ -8,6 +8,7 @@ import DoctorDashboard from "./pages/doctor/DoctorDashboard";
 import PatientDashboard from "./pages/patient/PatientDashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 
+
 const RootRedirect = () => {
   const navigate = useNavigate();
 

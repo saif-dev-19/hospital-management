@@ -6,6 +6,7 @@ import Dashboard from "./Dashboard";
 import Doctors from "./Doctors";
 import Patients from "./Patients";
 import Appointments from "./Appointments";
+import AppointmentDetails from "./AppointmentDetails";
 import Billing from "./Billing";
 import Settings from "./Settings";
 import Notifications from "./Notifications";
@@ -81,6 +82,7 @@ const AdminDashboard = ({ setRole, setUser }) => {
           <Route path="doctors" element={<Doctors />} />
           <Route path="patients" element={<Patients />} />
           <Route path="appointments" element={<Appointments />} />
+          <Route path="appointments/:id" element={<AppointmentDetails />} />
           <Route path="billing" element={<Billing />} />
           <Route path="notifications" element={<Notifications />} />
           <Route path="settings" element={<Settings />} />

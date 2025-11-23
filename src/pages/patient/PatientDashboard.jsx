@@ -5,6 +5,7 @@ import authService from "../../api/authService";
 import Dashboard from "./Dashboard";
 import BookAppointment from "./BookAppointment";
 import MyAppointments from "./MyAppointments";
+import AppointmentDetails from "./AppointmentDetails";
 import Doctors from "./Doctors";
 import MedicalRecords from "./MedicalRecords";
 import Profile from "./Profile";
@@ -85,6 +86,7 @@ const PatientDashboard = ({ setRole, setUser }) => {
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="book-appointment" element={<BookAppointment />} />
           <Route path="appointments" element={<MyAppointments />} />
+          <Route path="appointments/:id" element={<AppointmentDetails />} />
           <Route path="doctors" element={<Doctors />} />
           <Route path="records" element={<MedicalRecords />} />
           <Route path="notifications" element={<Notifications />} />

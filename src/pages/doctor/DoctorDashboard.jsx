@@ -4,6 +4,7 @@ import { useState } from "react";
 import authService from "../../api/authService";
 import Dashboard from "./Dashboard";
 import Appointments from "./Appointments";
+import AppointmentDetails from "./AppointmentDetails";
 import Patients from "./Patients";
 import MedicalRecords from "./MedicalRecords";
 import Settings from "./Settings";
@@ -81,6 +82,7 @@ const DoctorDashboard = ({ setRole, setUser }) => {
         <Routes>
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="appointments" element={<Appointments />} />
+          <Route path="appointments/:id" element={<AppointmentDetails />} />
           <Route path="patients" element={<Patients />} />
           <Route path="records" element={<MedicalRecords />} />
           <Route path="notifications" element={<Notifications />} />

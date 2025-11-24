@@ -4,6 +4,7 @@ import API from "../../api/axios";
 
 const MyAppointments = () => {
   const [appointments, setAppointments] = useState([]);
+  // eslint-disable-next-line no-unused-vars
   const [search, setSearch] = useState("");
 
 

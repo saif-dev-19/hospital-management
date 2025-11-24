@@ -24,7 +24,7 @@ const BookAppointment = () => {
 
   // Fetch specialties on mount
   useEffect(() => {
-    axios.get("http://127.0.0.1:8000/api/specialties/")
+    axios.get("https://healsync-lime.vercel.app/api/specialties/")
       .then(res => setSpecialties(res.data))
       .catch(err => console.error(err));
   }, []);
